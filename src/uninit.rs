@@ -1,8 +1,9 @@
-impl FieldProject for MaybeUninit<()> {
+impl FieldProject for MaybeUninitProj {
     type Wrapper<'a, T> = &'a MaybeUninit<T>where T:'a;
     type WrapperMut<'a, T> = &'a mut MaybeUninit<T>where T:'a;
 
     unsafe fn field_project<'a, T, U>(
+        self,
         this: Self::Wrapper<'a, T>,
         f: impl FnOnce(*const T) -> *const U,
     ) -> Self::Wrapper<'a, U> {
@@ -10,6 +11,7 @@ impl FieldProject for MaybeUninit<()> {
     }
 
     unsafe fn field_project_mut<'a, T, U>(
+        self,
         this: Self::WrapperMut<'a, T>,
         f: impl FnOnce(*mut T) -> *mut U,
     ) -> Self::WrapperMut<'a, U> {
@@ -17,16 +19,27 @@ impl FieldProject for MaybeUninit<()> {
     }
 }
 
+#[derive(Default)]
+pub struct MaybeUninitProj;
+
+impl<T> Projectable for &mut MaybeUninit<T> {
+    type FP = MaybeUninitProj;
+}
+
+impl<T> Projectable for &MaybeUninit<T> {
+    type FP = MaybeUninitProj;
+}
+
 #[test]
 fn uninit() {
     let mut foo: MaybeUninit<Foo> = MaybeUninit::uninit();
     let r = &mut foo;
-    let bar: &mut MaybeUninit<Bar> = project!(&mut r.b as MaybeUninit<()>);
-    let b: &mut MaybeUninit<u32> = project!(&mut bar.b as MaybeUninit<()>);
+    let bar: &mut MaybeUninit<Bar> = project!(&mut r.b);
+    let b: &mut MaybeUninit<u32> = project!(&mut bar.b);
     b.write(1337);
-    let a: &mut MaybeUninit<usize> = project!(&mut bar.a as MaybeUninit<()>);
+    let a: &mut MaybeUninit<usize> = project!(&mut bar.a);
     a.write(42);
-    let a: &mut MaybeUninit<usize> = project!(&mut r.a as MaybeUninit<()>);
+    let a: &mut MaybeUninit<usize> = project!(&mut r.a);
     a.write(0);
     let foo = unsafe { foo.assume_init() };
     println!("{foo:?}");

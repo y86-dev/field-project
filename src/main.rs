@@ -1,6 +1,6 @@
-#![feature(generic_associated_types, new_uninit)]
+#![feature(new_uninit, specialization)]
 use core::{
-    cell::{Cell, Ref, RefCell, RefMut, UnsafeCell},
+    cell::{Cell, Ref, RefMut, UnsafeCell},
     marker::PhantomPinned,
     mem::MaybeUninit,
     pin::Pin,
@@ -16,29 +16,39 @@ pub trait FieldProject {
 
     /// Safety: closure must only do a field projection and not access the inner data
     unsafe fn field_project<'a, T, U>(
+        self,
         this: Self::Wrapper<'a, T>,
         f: impl FnOnce(*const T) -> *const U,
     ) -> Self::Wrapper<'a, U>;
 
     /// Safety: closure must only do a field projection and not access the inner data
     unsafe fn field_project_mut<'a, T, U>(
+        self,
         this: Self::WrapperMut<'a, T>,
         f: impl FnOnce(*mut T) -> *mut U,
     ) -> Self::WrapperMut<'a, U>;
 }
 
+pub trait Projectable {
+    type FP: FieldProject + Default;
+}
+
+pub fn get_projector<P: Projectable>(_: &P) -> P::FP {
+    <P::FP as Default>::default()
+}
+
 #[macro_export]
 macro_rules! project {
-    (&$e:ident.$f:ident as $t:ty) => {
+    (&$e:ident.$f:ident) => {
         unsafe {
-            <$t as $crate::FieldProject>::field_project($e, |i| ::core::ptr::addr_of!((*i).$f))
+            let fp = $crate::get_projector(&$e);
+            $crate::FieldProject::field_project(fp, $e, |i| ::core::ptr::addr_of!((*i).$f))
         }
     };
-    (&mut $e:ident.$f:ident as $t:ty) => {
+    (&mut $e:ident.$f:ident) => {
         unsafe {
-            <$t as $crate::FieldProject>::field_project_mut($e, |i| {
-                ::core::ptr::addr_of_mut!((*i).$f)
-            })
+            let fp = $crate::get_projector(&$e);
+            $crate::FieldProject::field_project_mut(fp, $e, |i| ::core::ptr::addr_of_mut!((*i).$f))
         }
     };
 }
