@@ -23,11 +23,11 @@ impl FieldProject for PinProj {
 pub struct PinProj;
 
 impl<T> Projectable for Pin<&T> {
-    default type FP = PinProj;
+    type FP = PinProj;
 }
 
 impl<T> Projectable for Pin<&mut T> {
-    default type FP = PinProj;
+    type FP = PinProj;
 }
 
 #[test]

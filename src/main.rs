@@ -1,4 +1,4 @@
-#![feature(new_uninit, specialization)]
+#![feature(new_uninit)]
 use core::{
     cell::{Cell, Ref, RefMut, UnsafeCell},
     marker::PhantomPinned,
@@ -66,7 +66,7 @@ struct Bar {
 }
 
 include!("uninit.rs");
-include!("uninit_pin.rs");
+//include!("uninit_pin.rs");
 include!("pin.rs");
 include!("cell.rs");
 include!("unsafe_cell.rs");
