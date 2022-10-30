@@ -9,6 +9,7 @@ mod refs;
 
 pub use field_project_internal::{HasFields, PinProjections};
 
+/// Representation of a field.
 pub struct Field<T: HasFields, U, const N: usize> {
     offset: usize,
     phantom: PhantomData<fn(T, U) -> (T, U)>,
@@ -27,7 +28,9 @@ impl<T: HasFields, U, const N: usize> Field<T, U, N> {
     }
 }
 
+/// Project a field structurally.
 pub struct Projected;
+/// Unwrap a field.
 pub struct Unwrapped;
 
 mod sealed {
@@ -39,6 +42,7 @@ mod sealed {
     unsafe impl IsProjKind for super::Unwrapped {}
 }
 
+/// Helper trait used to decide which kind of projection takes place.
 pub unsafe trait ProjSelector<'a, P: Project<'a>>: sealed::IsProjKind {
     type Output<U: 'a>: 'a
     where
@@ -77,19 +81,29 @@ unsafe impl<'a, P: Project<'a>> ProjSelector<'a, P> for Unwrapped {
     }
 }
 
+/// Info trait to set the structural projection kind of a field.
 pub trait Projectable<'a, P: Project<'a>>: sealed::IsField {
+    /// The projection kind of this field.
     type ProjKind: sealed::IsProjKind;
 }
 
+/// Facilitates projections.
+///
+/// Wrappers like [`Pin`] should implement this trait. It allows projecting from
+/// `Wrapper<&mut Struct>` to `Wrapper<&mut Field>`.
 pub unsafe trait Project<'a>: 'a + Sized {
+    /// The inner type that will be projected.
     type Inner: 'a + HasFields;
+    /// The output type of structurally projected fields.
     type Output<U: 'a>: 'a
     where
         Self: 'a;
+    /// The output type of not structurally projected fields.
     type Unwrap<U: 'a>: 'a
     where
         Self: 'a;
 
+    /// Project this wrapper to the given field according to its structural projection kind.
     fn project<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
@@ -103,6 +117,12 @@ pub unsafe trait Project<'a>: 'a + Sized {
         }
     }
 
+    /// Project the given field regardless of its structural projection kind.
+    ///
+    /// # Safety
+    ///
+    /// Only call this function if the structural projection kind is indeed structural projection
+    /// for the given field.
     unsafe fn project_true<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
@@ -110,6 +130,12 @@ pub unsafe trait Project<'a>: 'a + Sized {
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>;
 
+    /// Unwraps the given field regardless of its structural projection kind.
+    ///
+    /// # Safety
+    ///
+    /// Only call this function if the structural projection kind is indeed no structural projection
+    /// for the given field.
     unsafe fn unwrap_true<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
@@ -118,6 +144,11 @@ pub unsafe trait Project<'a>: 'a + Sized {
         Field<Self::Inner, U, N>: Projectable<'a, Self>;
 }
 
+/// # Safety
+///
+/// - only structs with named fields implement this trait,
+/// - the type provides for every field a constant with the same name and visibilty of type
+/// [`Field<Self, FieldType, N>`] where `N` is unique to that field.
 pub unsafe trait HasFields {}
 
 impl<T> !HasFields for core::mem::MaybeUninit<T> {}
