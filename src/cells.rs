@@ -6,7 +6,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a UnsafeCell<T> {
     type Output<U: 'a> = &'a UnsafeCell<U>;
     type Unwrap<U: 'a> = &'a UnsafeCell<U>;
 
-    unsafe fn project_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
         unsafe {
             &*self
                 .get()
@@ -16,7 +16,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a UnsafeCell<T> {
         }
     }
 
-    unsafe fn unwrap_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
         unsafe {
             &*self
                 .get()
@@ -38,7 +38,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a Cell<T> {
     type Output<U: 'a> = &'a Cell<U>;
     type Unwrap<U: 'a> = &'a Cell<U>;
 
-    unsafe fn project_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
         unsafe {
             &*self
                 .as_ptr()
@@ -48,7 +48,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a Cell<T> {
         }
     }
 
-    unsafe fn unwrap_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
         unsafe {
             &*self
                 .as_ptr()

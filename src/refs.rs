@@ -5,7 +5,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a mut T {
     type Output<U: 'a> = &'a mut U;
     type Unwrap<U: 'a> = &'a mut U;
 
-    unsafe fn project_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
         unsafe {
             &mut *(self as *mut T)
                 .cast::<u8>()
@@ -14,7 +14,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a mut T {
         }
     }
 
-    unsafe fn unwrap_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
         unsafe {
             &mut *(self as *mut T)
                 .cast::<u8>()
@@ -33,7 +33,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a T {
     type Output<U: 'a> = &'a U;
     type Unwrap<U: 'a> = &'a U;
 
-    unsafe fn project_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
         unsafe {
             &*(self as *const T)
                 .cast::<u8>()
@@ -42,7 +42,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a T {
         }
     }
 
-    unsafe fn unwrap_true<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
         unsafe {
             &*(self as *const T)
                 .cast::<u8>()

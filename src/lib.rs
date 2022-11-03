@@ -64,7 +64,7 @@ unsafe impl<'a, P: Project<'a>> ProjSelector<'a, P> for Projected {
     where
         Field<P::Inner, U, N>: Projectable<'a, P>,
     {
-        P::project_true(proj, field)
+        P::project_field(proj, field)
     }
 }
 
@@ -77,7 +77,7 @@ unsafe impl<'a, P: Project<'a>> ProjSelector<'a, P> for Unwrapped {
     where
         Field<P::Inner, U, N>: Projectable<'a, P>,
     {
-        P::unwrap_true(proj, field)
+        P::unwrap_field(proj, field)
     }
 }
 
@@ -123,7 +123,7 @@ pub unsafe trait Project<'a>: 'a + Sized {
     ///
     /// Only call this function if the structural projection kind is indeed structural projection
     /// for the given field.
-    unsafe fn project_true<U: 'a, const N: usize>(
+    unsafe fn project_field<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
     ) -> Self::Output<U>
@@ -136,7 +136,7 @@ pub unsafe trait Project<'a>: 'a + Sized {
     ///
     /// Only call this function if the structural projection kind is indeed no structural projection
     /// for the given field.
-    unsafe fn unwrap_true<U: 'a, const N: usize>(
+    unsafe fn unwrap_field<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
     ) -> Self::Unwrap<U>
