@@ -6,30 +6,21 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a mut MaybeUninit<T> {
     type Projected<U: 'a> = &'a mut MaybeUninit<U>;
     type Unwrapped<U: 'a> = &'a mut MaybeUninit<U>;
 
-    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U>
+    unsafe fn project_field<U: 'a, const N: usize>(
+        self,
+        field: Field<T, U, N>,
+    ) -> Self::Projected<U>
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>,
     {
-        unsafe {
-            &mut *self
-                .as_mut_ptr()
-                .cast::<u8>()
-                .add(field.offset())
-                .cast::<MaybeUninit<U>>()
-        }
+        unsafe { &mut *self.as_mut_ptr().project(field).cast::<MaybeUninit<U>>() }
     }
 
     unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrapped<U>
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>,
     {
-        unsafe {
-            &mut *self
-                .as_mut_ptr()
-                .cast::<u8>()
-                .add(field.offset())
-                .cast::<MaybeUninit<U>>()
-        }
+        unsafe { &mut *self.as_mut_ptr().project(field).cast::<MaybeUninit<U>>() }
     }
 }
 

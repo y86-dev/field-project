@@ -1,10 +1,11 @@
-#![feature(negative_impls, const_refs_to_cell)]
+#![feature(negative_impls)]
 use core::marker::PhantomData;
 
 mod cells;
 mod maybe_uninit;
 mod pin;
 mod pin_uninit;
+mod ptr;
 mod refs;
 
 pub use field_project_internal::{HasFields, PinProjections};
@@ -121,8 +122,7 @@ pub unsafe trait Project<'a>: 'a + Sized {
     ///
     /// # Safety
     ///
-    /// Only call this function if the structural projection kind is indeed structural projection
-    /// for the given field.
+    /// Only call this function if the projection kind is indeed [`Projected`].
     unsafe fn project_field<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
@@ -134,8 +134,7 @@ pub unsafe trait Project<'a>: 'a + Sized {
     ///
     /// # Safety
     ///
-    /// Only call this function if the structural projection kind is indeed no structural projection
-    /// for the given field.
+    /// Only call this function if the projection kind is indeed [`Unwrapped`].
     unsafe fn unwrap_field<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
