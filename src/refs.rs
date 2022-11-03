@@ -2,10 +2,10 @@ use crate::*;
 
 unsafe impl<'a, T: HasFields> Project<'a> for &'a mut T {
     type Inner = T;
-    type Output<U: 'a> = &'a mut U;
-    type Unwrap<U: 'a> = &'a mut U;
+    type Projected<U: 'a> = &'a mut U;
+    type Unwrapped<U: 'a> = &'a mut U;
 
-    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U> {
         unsafe {
             &mut *(self as *mut T)
                 .cast::<u8>()
@@ -14,7 +14,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a mut T {
         }
     }
 
-    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrapped<U> {
         unsafe {
             &mut *(self as *mut T)
                 .cast::<u8>()
@@ -30,10 +30,10 @@ impl<'a, T: 'a + HasFields, U: 'a, const N: usize> Projectable<'a, &'a mut T> fo
 
 unsafe impl<'a, T: HasFields> Project<'a> for &'a T {
     type Inner = T;
-    type Output<U: 'a> = &'a U;
-    type Unwrap<U: 'a> = &'a U;
+    type Projected<U: 'a> = &'a U;
+    type Unwrapped<U: 'a> = &'a U;
 
-    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U> {
         unsafe {
             &*(self as *const T)
                 .cast::<u8>()
@@ -42,7 +42,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a T {
         }
     }
 
-    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrapped<U> {
         unsafe {
             &*(self as *const T)
                 .cast::<u8>()

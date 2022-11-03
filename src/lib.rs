@@ -56,7 +56,7 @@ pub unsafe trait ProjSelector<'a, P: Project<'a>>: sealed::IsProjKind {
 }
 
 unsafe impl<'a, P: Project<'a>> ProjSelector<'a, P> for Projected {
-    type Output<U: 'a> = P::Output<U>;
+    type Output<U: 'a> = P::Projected<U>;
     unsafe fn select_proj<U, const N: usize>(
         proj: P,
         field: Field<P::Inner, U, N>,
@@ -69,7 +69,7 @@ unsafe impl<'a, P: Project<'a>> ProjSelector<'a, P> for Projected {
 }
 
 unsafe impl<'a, P: Project<'a>> ProjSelector<'a, P> for Unwrapped {
-    type Output<U: 'a> = P::Unwrap<U>;
+    type Output<U: 'a> = P::Unwrapped<U>;
     unsafe fn select_proj<U, const N: usize>(
         proj: P,
         field: Field<P::Inner, U, N>,
@@ -95,11 +95,11 @@ pub unsafe trait Project<'a>: 'a + Sized {
     /// The inner type that will be projected.
     type Inner: 'a + HasFields;
     /// The output type of structurally projected fields.
-    type Output<U: 'a>: 'a
+    type Projected<U: 'a>: 'a
     where
         Self: 'a;
     /// The output type of not structurally projected fields.
-    type Unwrap<U: 'a>: 'a
+    type Unwrapped<U: 'a>: 'a
     where
         Self: 'a;
 
@@ -126,7 +126,7 @@ pub unsafe trait Project<'a>: 'a + Sized {
     unsafe fn project_field<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
-    ) -> Self::Output<U>
+    ) -> Self::Projected<U>
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>;
 
@@ -139,7 +139,7 @@ pub unsafe trait Project<'a>: 'a + Sized {
     unsafe fn unwrap_field<U: 'a, const N: usize>(
         self,
         field: Field<Self::Inner, U, N>,
-    ) -> Self::Unwrap<U>
+    ) -> Self::Unwrapped<U>
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>;
 }

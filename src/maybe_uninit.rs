@@ -3,10 +3,10 @@ use core::mem::MaybeUninit;
 
 unsafe impl<'a, T: HasFields> Project<'a> for &'a mut MaybeUninit<T> {
     type Inner = T;
-    type Output<U: 'a> = &'a mut MaybeUninit<U>;
-    type Unwrap<U: 'a> = &'a mut MaybeUninit<U>;
+    type Projected<U: 'a> = &'a mut MaybeUninit<U>;
+    type Unwrapped<U: 'a> = &'a mut MaybeUninit<U>;
 
-    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U>
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U>
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>,
     {
@@ -19,7 +19,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a mut MaybeUninit<T> {
         }
     }
 
-    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U>
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrapped<U>
     where
         Field<Self::Inner, U, N>: Projectable<'a, Self>,
     {

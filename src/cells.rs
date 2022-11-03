@@ -3,10 +3,10 @@ use core::cell::{Cell, UnsafeCell};
 
 unsafe impl<'a, T: HasFields> Project<'a> for &'a UnsafeCell<T> {
     type Inner = T;
-    type Output<U: 'a> = &'a UnsafeCell<U>;
-    type Unwrap<U: 'a> = &'a UnsafeCell<U>;
+    type Projected<U: 'a> = &'a UnsafeCell<U>;
+    type Unwrapped<U: 'a> = &'a UnsafeCell<U>;
 
-    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U> {
         unsafe {
             &*self
                 .get()
@@ -16,7 +16,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a UnsafeCell<T> {
         }
     }
 
-    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrap<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Unwrapped<U> {
         unsafe {
             &*self
                 .get()
@@ -35,10 +35,10 @@ impl<'a, T: 'a + HasFields, U: 'a, const N: usize> Projectable<'a, &'a UnsafeCel
 
 unsafe impl<'a, T: HasFields> Project<'a> for &'a Cell<T> {
     type Inner = T;
-    type Output<U: 'a> = &'a Cell<U>;
-    type Unwrap<U: 'a> = &'a Cell<U>;
+    type Projected<U: 'a> = &'a Cell<U>;
+    type Unwrapped<U: 'a> = &'a Cell<U>;
 
-    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn project_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U> {
         unsafe {
             &*self
                 .as_ptr()
@@ -48,7 +48,7 @@ unsafe impl<'a, T: HasFields> Project<'a> for &'a Cell<T> {
         }
     }
 
-    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Output<U> {
+    unsafe fn unwrap_field<U: 'a, const N: usize>(self, field: Field<T, U, N>) -> Self::Projected<U> {
         unsafe {
             &*self
                 .as_ptr()
